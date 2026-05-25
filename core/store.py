@@ -3,6 +3,10 @@ Persistence Layer
 =================
 JSON-backed storage with a clean interface ready to swap to SQLite/Postgres.
 All I/O goes through CardStore — never access files directly from UI code.
+
+Streamlit Cloud note: the app directory is read-only, so we write to /tmp
+which is always writable. Data resets on container restart (this is expected
+for a cloud study app — SRS state is per-session unless you add a DB).
 """
 
 from __future__ import annotations
@@ -16,15 +20,15 @@ from core.card_model import Flashcard
 from core.srs_engine import CardState, SRSEngine
 
 
-DATA_DIR = Path("data")
-CARDS_FILE    = DATA_DIR / "cards" / "library.json"
-STATES_FILE   = DATA_DIR / "sessions" / "states.json"
-ANALYTICS_FILE = DATA_DIR / "sessions" / "analytics.json"
+# /tmp is always writable on Streamlit Cloud and local
+_TMP = Path("/tmp/quant_memoria")
+CARDS_FILE     = _TMP / "library.json"
+STATES_FILE    = _TMP / "states.json"
+ANALYTICS_FILE = _TMP / "analytics.json"
 
 
 def _ensure_dirs():
-    for f in [CARDS_FILE, STATES_FILE, ANALYTICS_FILE]:
-        f.parent.mkdir(parents=True, exist_ok=True)
+    _TMP.mkdir(parents=True, exist_ok=True)
 
 
 def _load_json(path: Path) -> dict | list:
