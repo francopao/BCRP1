@@ -681,3 +681,13 @@ def get_home_cards():
 
 def get_cards_with_graphs():
     return [c for c in CARDS if c.get("graph_type")]
+
+# ── Auto-import all content modules ──────────────────────────────────
+# To add a new book/chapter: create content/your_file.py with a CARDS list,
+# then add one import line below. Everything else is automatic.
+
+try:
+    from content.pm_campbell_saa import CARDS as _CAMPBELL
+    CARDS = CARDS + _CAMPBELL
+except Exception:
+    pass  # graceful degradation if file missing
